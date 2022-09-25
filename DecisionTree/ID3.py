@@ -44,7 +44,8 @@ def Entropy(list, labels):
         if p == 0:
             # dont do anything, trying to take log2 of 0 is bad
             pass
-        total += p*math.log(p, 2)
+        else:
+            total += p*math.log(p, 2)
     return -total
 
 # Calculate the MajorityError given a list and its sublist of labels
@@ -68,7 +69,7 @@ def GiniIndex(list, labels):
     return 1 - total
 
 # Calculate the information gain
-def InformationGain(list, KV, labels):
+def InformationGain(list, KV, labels, heuristic):
     index, vals = KV
     total = 0
     for v in vals:
@@ -76,13 +77,13 @@ def InformationGain(list, KV, labels):
         for l in list:
             if l[index] == v:
                 sublist.append(l)
-        total += (len(sublist)/len(list)) * (GiniIndex(sublist, labels))
-    return GiniIndex(list, labels)-total
+        total += (len(sublist)/len(list)) * (heuristic(sublist, labels))
+    return heuristic(list, labels)-total
 
 #----------Main algorithm----------
 
 # Implementation of ID3
-def ID3(list, attributes, label, max_depth=-1):
+def ID3(list, attributes, label, max_depth=-1, heuristic="GI"):
     # Check if every example is the same, if so no need for a split, return the root
     root = Node()
     first = list[0][len(list[0])-1]
@@ -96,11 +97,21 @@ def ID3(list, attributes, label, max_depth=-1):
         return root
     
     # Calculate the best Information Gain among the labels
+
+    func = None
+    if heuristic == "GI":
+        func = GiniIndex
+    elif heuristic == "ME":
+        func = MajorityError
+    elif heuristic == "Entropy":
+        func = Entropy
+    else:
+        func = None
     maxIG = 0
     KV = None
     for k in attributes.keys():
         i, v = attributes.get(k)
-        IG = InformationGain(list, (i,v), label)
+        IG = InformationGain(list, (i,v), label, func)
         if IG > maxIG:
             maxIG = IG
             KV = k
@@ -179,7 +190,23 @@ with open('./DecisionTree/Car/test.csv', 'r') as car_test:
         # process one training example
         car_test_data.append(terms)
 
-# build the car training data set
+# test the car data
+func = "GI"
+print(f'Information Gain type: {func}')
+for a in range(len(car_attrs)):
+    root = ID3(car_train_data, car_attrs, car_labels, a, heuristic=func)
+    succ = 0
+    fail = 0
+    for row in car_test_data:
+        if root.walkNodes(row):
+            succ += 1
+        else:
+            fail += 1
+    print(f'Max Depth: {a+1}, Error: {fail/(succ+fail)}')
+
+#----------Bank Data----------
+
+# build the bank training data set
 bank_train_data = []
 bank_labels = ['yes','no']
 bank_attrs = {'age': (0, ['1', '0']),
@@ -201,26 +228,84 @@ bank_attrs = {'age': (0, ['1', '0']),
                 'previous': (14, ['1','0']),
                 'poutcome': (15, ['unknown','other','failure','success'])}
 
-# test the car data
-for a in range(len(car_attrs)):
-    root = ID3(car_train_data, car_attrs, car_labels, a)
-    succ = 0
-    fail = 0
-    for row in car_test_data:
-        if root.walkNodes(row):
-            succ += 1
-        else:
-            fail += 1
-    print(f'Max Depth: {a+1}, Error: {fail/(succ+fail)}')
-
-#----------Bank Data----------
+ages = []
+balances = []
+days = []
+durations = []
+campaigns = []
+pdays = []
+previous = []
 
 with open('./DecisionTree/Bank/train.csv', 'r') as bank_train:
     for line in bank_train:
         terms = line.strip().split(',')
-        # process one training example
-        bank_train_data.append(terms)
-print(len(car_attrs))
-
-
-
+        ages.append(terms[0])
+        balances.append(terms[5])
+        days.append(terms[9])
+        durations.append(terms[11])
+        campaigns.append(terms[12])
+        pdays.append(terms[13])
+        previous.append(terms[14])
+    
+    ages.sort()
+    balances.sort()
+    days.sort()
+    durations.sort()
+    campaigns.sort()
+    pdays.sort()
+    previous.sort()
+    bank_train.seek(0)
+    for line in bank_train:
+        tempList = []
+        terms = line.strip().split(',')
+        if terms[0] > ages[int(len(ages)/2)]:
+            tempList.append('1')
+        else:
+            tempList.append('0')
+        if terms[1] == 'unknown':
+            tempList.append('blue-collar')
+        else:
+            tempList.append(terms[1])
+        tempList.append(terms[2])
+        if terms[3] == 'unknown':
+            tempList.append('secondary')
+        else:
+            tempList.append(terms[3])
+        tempList.append(terms[4])
+        if terms[5] > ages[int(len(balances)/2)]:
+            tempList.append('1')
+        else:
+            tempList.append('0')
+        tempList.append(terms[6])
+        tempList.append(terms[7])
+        if terms[8] == 'unknown':
+            tempList.append('cellular')
+        else:
+            tempList.append(terms[8])
+        if terms[9] > ages[int(len(days)/2)]:
+            tempList.append('1')
+        else:
+            tempList.append('0')
+        tempList.append(terms[10])
+        if terms[11] > ages[int(len(durations)/2)]:
+            tempList.append('1')
+        else:
+            tempList.append('0')
+        if terms[12] > ages[int(len(campaigns)/2)]:
+            tempList.append('1')
+        else:
+            tempList.append('0')
+        if terms[13] > ages[int(len(pdays)/2)]:
+            tempList.append('1')
+        else:
+            tempList.append('0')
+        if terms[14] > ages[int(len(previous)/2)]:
+            tempList.append('1')
+        else:
+            tempList.append('0')
+        if terms[15] == 'unknown':
+            tempList.append('failure')
+        else:
+            tempList.append(terms[15])
+        tempList.append(terms[16])
+        bank_train_data.append(tempList)
