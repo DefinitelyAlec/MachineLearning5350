@@ -1,0 +1,15 @@
+s,h,h,w,no
+s,h,h,s,no
+o,h,h,w,yes
+r,m,h,w,yes
+r,c,n,w,yes
+r,c,n,s,no
+o,c,n,s,yes
+s,m,h,w,no
+s,c,n,w,yes
+r,n,m,w,yes
+s,m,n,s,yes
+o,m,h,s,yes
+o,h,n,w,yes
+r,m,h,s,no
+s,m,n,w,yes

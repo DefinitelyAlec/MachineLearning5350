@@ -421,15 +421,35 @@ with open('./DecisionTree/Bank/test.csv', 'r') as f:
 
 
 # test the bank data
-func2 = "GI"
-print(f'Information Gain type: {func2}')
-for a in range(len(bank_attrs)):
-    root = ID3(bank_train_data, bank_attrs, bank_labels, a, heuristic=func2)
-    succ = 0
-    fail = 0
-    for row in bank_test_data:
-        if root.walkNodes(row):
-            succ += 1
-        else:
-            fail += 1
-    print(f'Max Depth: {a+1}, Error: {fail/(succ+fail)}')
+# func2 = "GI"
+# print(f'Information Gain type: {func2}')
+# for a in range(len(bank_attrs)):
+#     root = ID3(bank_train_data, bank_attrs, bank_labels, a, heuristic=func2)
+#     succ = 0
+#     fail = 0
+#     for row in bank_test_data:
+#         if root.walkNodes(row):
+#             succ += 1
+#         else:
+#             fail += 1
+#     print(f'Max Depth: {a+1}, Error: {fail/(succ+fail)}')
+
+# build the car training data set
+weather_train_data = []
+weather_labels = ['yes', 'no']
+weather_attrs = {'outlook': (0, ['s', 'o', 'r']),
+            'temperature': (1, ['h', 'm', 'c']),
+            'humidity': (2, ['h', 'n', 'l']),
+            'wind': (3, ['s', 'w'])}
+
+with open('./DecisionTree/Weather/train.csv', 'r') as weather_train:
+    for line in weather_train:
+        terms = line.strip().split(',')
+        # process one training example
+        weather_train_data.append(terms)
+
+for key in weather_attrs:
+    i, v = weather_attrs.get(key)
+    IG = InformationGain(weather_train_data, (i,v), weather_labels, Entropy)
+    print(f'IG for {key} Entropy: {IG}')
+
