@@ -50,7 +50,9 @@ def Entropy(list, labels):
 
 # Calculate the MajorityError given a list and its sublist of labels
 def MajorityError(list, labels):
-    maxCountSoFar = 1
+    maxCountSoFar = 0
+    if len(list) == 0:
+        return 1
     for l in labels:
         count = 0
         for row in list:
@@ -191,18 +193,18 @@ with open('./DecisionTree/Car/test.csv', 'r') as car_test:
         car_test_data.append(terms)
 
 # test the car data
-func = "GI"
-print(f'Information Gain type: {func}')
-for a in range(len(car_attrs)):
-    root = ID3(car_train_data, car_attrs, car_labels, a, heuristic=func)
-    succ = 0
-    fail = 0
-    for row in car_test_data:
-        if root.walkNodes(row):
-            succ += 1
-        else:
-            fail += 1
-    print(f'Max Depth: {a+1}, Error: {fail/(succ+fail)}')
+# func = "GI"
+# print(f'Information Gain type: {func}')
+# for a in range(len(car_attrs)):
+#     root = ID3(car_train_data, car_attrs, car_labels, a, heuristic=func)
+#     succ = 0
+#     fail = 0
+#     for row in car_test_data:
+#         if root.walkNodes(row):
+#             succ += 1
+#         else:
+#             fail += 1
+#     print(f'Max Depth: {a+1}, Error: {fail/(succ+fail)}')
 
 #----------Bank Data----------
 
@@ -228,6 +230,7 @@ bank_attrs = {'age': (0, ['1', '0']),
                 'previous': (14, ['1','0']),
                 'poutcome': (15, ['unknown','other','failure','success'])}
 
+# structure the columns
 ages = []
 balances = []
 days = []
@@ -236,6 +239,7 @@ campaigns = []
 pdays = []
 previous = []
 
+# read the data in
 with open('./DecisionTree/Bank/train.csv', 'r') as bank_train:
     for line in bank_train:
         terms = line.strip().split(',')
@@ -247,6 +251,7 @@ with open('./DecisionTree/Bank/train.csv', 'r') as bank_train:
         pdays.append(terms[13])
         previous.append(terms[14])
     
+    # sort each of the columns and reset the file position
     ages.sort()
     balances.sort()
     days.sort()
@@ -255,57 +260,176 @@ with open('./DecisionTree/Bank/train.csv', 'r') as bank_train:
     pdays.sort()
     previous.sort()
     bank_train.seek(0)
+
+    # fill in the missing data
     for line in bank_train:
+        # terms = line.strip().split(',')
+        # bank_train_data.append(terms)
         tempList = []
         terms = line.strip().split(',')
+
         if terms[0] > ages[int(len(ages)/2)]:
             tempList.append('1')
         else:
             tempList.append('0')
+
         if terms[1] == 'unknown':
             tempList.append('blue-collar')
         else:
             tempList.append(terms[1])
+
         tempList.append(terms[2])
+
         if terms[3] == 'unknown':
             tempList.append('secondary')
         else:
             tempList.append(terms[3])
+
         tempList.append(terms[4])
+
         if terms[5] > ages[int(len(balances)/2)]:
             tempList.append('1')
         else:
             tempList.append('0')
+
         tempList.append(terms[6])
+
         tempList.append(terms[7])
+
         if terms[8] == 'unknown':
             tempList.append('cellular')
         else:
             tempList.append(terms[8])
+
         if terms[9] > ages[int(len(days)/2)]:
             tempList.append('1')
         else:
             tempList.append('0')
+
         tempList.append(terms[10])
+
         if terms[11] > ages[int(len(durations)/2)]:
             tempList.append('1')
         else:
             tempList.append('0')
+
         if terms[12] > ages[int(len(campaigns)/2)]:
             tempList.append('1')
         else:
             tempList.append('0')
+
         if terms[13] > ages[int(len(pdays)/2)]:
             tempList.append('1')
         else:
             tempList.append('0')
+
         if terms[14] > ages[int(len(previous)/2)]:
             tempList.append('1')
         else:
             tempList.append('0')
+
         if terms[15] == 'unknown':
             tempList.append('failure')
         else:
             tempList.append(terms[15])
+
         tempList.append(terms[16])
+
         bank_train_data.append(tempList)
+
+# fill in missing data for test data too
+bank_test_data = []
+with open('./DecisionTree/Bank/test.csv', 'r') as f:
+    for line in f:
+        # terms = line.strip().split(',')
+        # bank_test_data.append(terms)
+        tempList = []
+        terms = line.strip().split(',')
+
+        if terms[0] > ages[int(len(ages)/2)]:
+            tempList.append('1')
+        else:
+            tempList.append('0')
+
+        if terms[1] == 'unknown':
+            # tempList.append('blue-collar')
+            tempList.append(terms[1])
+        else:
+            tempList.append(terms[1])
+
+        tempList.append(terms[2])
+
+        if terms[3] == 'unknown':
+            # tempList.append('secondary')
+            tempList.append(terms[3])
+        else:
+            tempList.append(terms[3])
+
+        tempList.append(terms[4])
+
+        if terms[5] > ages[int(len(balances)/2)]:
+            tempList.append('1')
+        else:
+            tempList.append('0')
+
+        tempList.append(terms[6])
+
+        tempList.append(terms[7])
+
+        if terms[8] == 'unknown':
+            # tempList.append('cellular')
+            tempList.append(terms[8])
+        else:
+            tempList.append(terms[8])
+
+        if terms[9] > ages[int(len(days)/2)]:
+            tempList.append('1')
+        else:
+            tempList.append('0')
+
+        tempList.append(terms[10])
+
+        if terms[11] > ages[int(len(durations)/2)]:
+            tempList.append('1')
+        else:
+            tempList.append('0')
+
+        if terms[12] > ages[int(len(campaigns)/2)]:
+            tempList.append('1')
+        else:
+            tempList.append('0')
+
+        if terms[13] > ages[int(len(pdays)/2)]:
+            tempList.append('1')
+        else:
+            tempList.append('0')
+
+        if terms[14] > ages[int(len(previous)/2)]:
+            tempList.append('1')
+        else:
+            tempList.append('0')
+
+        if terms[15] == 'unknown':
+            # tempList.append('failure')
+            tempList.append(terms[15])
+        else:
+            tempList.append(terms[15])
+
+        tempList.append(terms[16])
+        
+        bank_test_data.append(tempList)
+
+
+# test the bank data
+func2 = "GI"
+print(f'Information Gain type: {func2}')
+for a in range(len(bank_attrs)):
+    root = ID3(bank_train_data, bank_attrs, bank_labels, a, heuristic=func2)
+    succ = 0
+    fail = 0
+    for row in bank_test_data:
+        if root.walkNodes(row):
+            succ += 1
+        else:
+            fail += 1
+    print(f'Max Depth: {a+1}, Error: {fail/(succ+fail)}')
